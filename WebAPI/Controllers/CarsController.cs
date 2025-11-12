@@ -1,97 +1,72 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WebAPI.Models;
-using WebAPI.Repositories;
+using WebAPI.DTOs;
+using WebAPI.Services;
+using static WebAPI.Models.DTO.CarDTO;
 
-namespace CarRentalAPI.Controllers
+namespace WebAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CarsController : ControllerBase
     {
-        private readonly ICarRepository _carRepository;
+        private readonly ICarService _carService;
 
-        public CarsController(ICarRepository carRepository)
+        public CarsController(ICarService carService)
         {
-            _carRepository = carRepository;
+            _carService = carService;
         }
-
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Car>>> GetCars()
+        public async Task<ActionResult<APIResponse<IEnumerable<CarResponseDTO>>>> GetCars()
         {
-            var cars = await _carRepository.GetAllAsync();
-            return Ok(cars);
+            var cars = await _carService.GetAllCarsAsync();
+            return Ok(new APIResponse<IEnumerable<CarResponseDTO>>(cars));
         }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<Car>> GetCar(int id)
-        {
-            var car = await _carRepository.GetByIdAsync(id);
+        public async Task<ActionResult<APIResponse<CarResponseDTO>>> GetCar(int id)
+        {   
+            var car = await _carService.GetCarByIdAsync(id);
             if (car == null)
-            {
-                return NotFound();
+            {   
+                return NotFound(new APIResponse<CarResponseDTO>("Автомобиль не найден"));
             }
-            return car;
+            return Ok(new APIResponse<CarResponseDTO>(car));
         }
 
         [HttpGet("available")]
-        public async Task<ActionResult<IEnumerable<Car>>> GetAvailableCars()
+        public async Task<ActionResult<APIResponse<IEnumerable<CarResponseDTO>>>> GetAvailableCars()
         {
-            var cars = await _carRepository.GetAvailableCarsAsync();
-            return Ok(cars);
+            var cars = await _carService.GetAvailableCarsAsync();
+            return Ok(new APIResponse<IEnumerable<CarResponseDTO>>(cars));
         }
 
         [HttpPost]
-        public async Task<ActionResult<Car>> CreateCar(Car car)
+        public async Task<ActionResult<APIResponse<CarResponseDTO>>> CreateCar(CarCreateDTO carDto)
         {
-            if (!await _carRepository.IsLicensePlateUniqueAsync(car.CarPlate))
-            {
-                ModelState.AddModelError("LicensePlate", "Машина с таким номером уже существует");
-                return BadRequest(ModelState);
-            }
-
-            var createdCar = await _carRepository.AddAsync(car);
-            return CreatedAtAction(nameof(GetCar), new { id = createdCar.Id }, createdCar);
+            var car = await _carService.CreateCarAsync(carDto);
+            return CreatedAtAction(nameof(GetCar), new { id = car.Id },
+                new APIResponse<CarResponseDTO>(car));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCar(int id, Car car)
+        public async Task<ActionResult<APIResponse<CarResponseDTO>>> UpdateCar(int id, CarUpdateDTO carDto)
         {
-            if (id != car.Id)
+            var car = await _carService.UpdateCarAsync(id, carDto);
+            if (car == null)
             {
-                return BadRequest();
+                return NotFound(new APIResponse<CarResponseDTO>("Автомобиль не найден"));
             }
-
-            if (!await _carRepository.IsLicensePlateUniqueAsync(car.CarPlate, id))
-            {
-                ModelState.AddModelError("LicensePlate", "Машина с таким номером уже существует");
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                await _carRepository.UpdateAsync(car);
-            }
-            catch (Exception)
-            {
-                if (!await _carRepository.ExistsAsync(id))
-                {
-                    return NotFound();
-                }
-                throw;
-            }
-
-            return NoContent();
+            return Ok(new APIResponse<CarResponseDTO>(car));
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCar(int id)
+        public async Task<ActionResult<APIResponse<bool>>> DeleteCar(int id)
         {
-            var result = await _carRepository.DeleteAsync(id);
+            var result = await _carService.DeleteCarAsync(id);
             if (!result)
             {
-                return NotFound();
+                return NotFound(new APIResponse<bool>("Автомобиль не найден"));
             }
-            return NoContent();
+            return Ok(new APIResponse<bool>(true, "Автомобиль удален"));
         }
     }
 }
