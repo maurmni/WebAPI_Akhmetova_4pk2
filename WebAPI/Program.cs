@@ -22,11 +22,12 @@ builder.Services.AddScoped<IRenterRepository, RenterRepository>();
 builder.Services.AddScoped<IRentalRepository, RentalRepository>();
 
 builder.Services.AddScoped<ICarService, CarService>();
+builder.Services.AddScoped<IRenterService, RenterService>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 
-var app = builder.Build();
+builder.Services.AddLogging();
 
-// Configure the HTTP request pipeline.
+var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -38,6 +39,7 @@ app.UseMiddleware<MiddleWare>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -50,7 +52,7 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the DB.");
+        logger.LogError(ex, "Произошла ошибка при заполнении базы данных");
     }
 }
 
