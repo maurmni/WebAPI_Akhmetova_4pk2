@@ -35,7 +35,6 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<CarRentalContext>();
         context.Database.EnsureCreated();
-        Data.Initialize(context); 
     }
     catch (Exception ex)
     {

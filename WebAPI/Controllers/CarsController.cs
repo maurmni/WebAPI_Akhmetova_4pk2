@@ -45,7 +45,7 @@ namespace CarRentalAPI.Controllers
         {
             if (!await _carRepository.IsLicensePlateUniqueAsync(car.CarPlate))
             {
-                ModelState.AddModelError("LicensePlate", "Car with this license plate already exists.");
+                ModelState.AddModelError("LicensePlate", "Машина с таким номером уже существует");
                 return BadRequest(ModelState);
             }
 
@@ -63,7 +63,7 @@ namespace CarRentalAPI.Controllers
 
             if (!await _carRepository.IsLicensePlateUniqueAsync(car.CarPlate, id))
             {
-                ModelState.AddModelError("LicensePlate", "Car with this license plate already exists.");
+                ModelState.AddModelError("LicensePlate", "Машина с таким номером уже существует");
                 return BadRequest(ModelState);
             }
 
