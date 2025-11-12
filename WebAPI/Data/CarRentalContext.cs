@@ -13,7 +13,6 @@ namespace WebAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Конфигурация связей
             modelBuilder.Entity<Rental>()
                 .HasOne(r => r.Car)
                 .WithMany(c => c.Rentals)
@@ -24,7 +23,6 @@ namespace WebAPI.Data
                 .WithMany(c => c.Rentals)
                 .HasForeignKey(r => r.RenterId);
 
-            // Индексы для оптимизации
             modelBuilder.Entity<Car>()
                 .HasIndex(c => c.IsAvailable);
 

@@ -11,6 +11,7 @@ namespace WebAPI.Models
         public bool IsAvailable { get; set; }
         [Required]
         public string CarPlate { get; set; } = null!;
+        public decimal DailyPrice { get; set; } 
 
         public ICollection<Rental> Rentals { get; set; } = new List<Rental>();
     }
