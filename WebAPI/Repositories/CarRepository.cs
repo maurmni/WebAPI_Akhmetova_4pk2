@@ -4,7 +4,7 @@ using WebAPI.Models;
 
 namespace WebAPI.Repositories
 {
-    public class CarRepository : Repository<Car>, ICarRepository 
+    public class CarRepository : Repository<Car>, ICarRepository
     {
         public CarRepository(CarRentalContext context) : base(context) { }
 

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WebAPI.Data;
@@ -11,9 +12,11 @@ using WebAPI.Data;
 namespace WebAPI.Migrations
 {
     [DbContext(typeof(CarRentalContext))]
-    partial class CarRentalContextModelSnapshot : ModelSnapshot
+    [Migration("20251119081255_Auth-Users1")]
+    partial class AuthUsers1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,14 +66,8 @@ namespace WebAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("ActualReturnDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("CarId")
                         .HasColumnType("integer");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
@@ -78,12 +75,16 @@ namespace WebAPI.Migrations
                     b.Property<int>("RenterId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("ReturnDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -107,7 +108,7 @@ namespace WebAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("DriverLicenseNumber")
+                    b.Property<string>("DriverLicense")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -185,9 +186,9 @@ namespace WebAPI.Migrations
                         new
                         {
                             Id = 1,
-                            CreatedAt = new DateTime(2025, 11, 20, 7, 18, 40, 296, DateTimeKind.Utc).AddTicks(7188),
-                            Email = "admin@gmail.com",
-                            PasswordHash = "AQAAAAIAAYagAAAAEL1vq4SU8yajkbFTLDnS8s6zheC/ZqT3/fiVywb2SYeaotHK9UCVkOYoAspMMALdpQ==",
+                            CreatedAt = new DateTime(2025, 11, 19, 8, 12, 55, 97, DateTimeKind.Utc).AddTicks(5991),
+                            Email = "admin@carrental.com",
+                            PasswordHash = "AQAAAAIAAYagAAAAELEVZv9sDCIgU5uJF4P6bq9dHAHi739l/0OymGGwX1QufaIerskwK0qOAUnmSvAX8w==",
                             Role = "Admin",
                             Username = "admin"
                         });

@@ -6,10 +6,11 @@ namespace WebAPI.Services
     {
         Task<IEnumerable<RentalResponseDTO>> GetAllRentalsAsync();
         Task<RentalResponseDTO?> GetRentalByIdAsync(int id);
-        Task<RentalResponseDTO> CreateRentalAsync(RentalCreateDTO rentalDto);
+        Task<RentalResponseDTO> CreateRentalAsync(RentalCreateDTO rentalDto, int userId);
         Task<RentalResponseDTO?> CompleteRentalAsync(int id, RentalCompleteDTO completeDto);
         Task<IEnumerable<RentalResponseDTO>> GetActiveRentalsAsync();
         Task<IEnumerable<RentalResponseDTO>> GetRentalsByRenterAsync(int renterId);
         Task<IEnumerable<RentalResponseDTO>> GetOverdueRentalsAsync();
+        Task<IEnumerable<RentalResponseDTO>> GetRentalsByUserAsync(int userId);
     }
 }

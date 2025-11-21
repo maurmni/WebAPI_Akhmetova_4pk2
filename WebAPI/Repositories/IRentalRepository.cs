@@ -4,7 +4,7 @@ namespace WebAPI.Repositories
 {
     public interface IRentalRepository : IRepository<Rental>
     {
-        Task<IEnumerable<Rental>> GetRentalsByCustomerIdAsync(int customerId);
+        Task<IEnumerable<Rental>> GetRentalsByRenterIdAsync(int renterId);
         Task<IEnumerable<Rental>> GetRentalsByCarIdAsync(int carId);
         Task<IEnumerable<Rental>> GetActiveRentalsAsync();
         Task<IEnumerable<Rental>> GetCompletedRentalsAsync();

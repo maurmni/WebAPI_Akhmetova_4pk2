@@ -1,4 +1,5 @@
-﻿using static WebAPI.Models.DTO.RenterDTO;
+﻿using static WebAPI.Models.DTO.RentalDTO;
+using static WebAPI.Models.DTO.RenterDTO;
 
 namespace WebAPI.Services
 {
@@ -11,5 +12,6 @@ namespace WebAPI.Services
         Task<RenterResponseDTO?> UpdateRenterAsync(int id, RenterUpdateDTO renterDto);
         Task<bool> DeleteRenterAsync(int id);
         Task<RenterResponseDTO?> GetRenterWithRentalsAsync(int id);
+        Task<IEnumerable<RentalResponseDTO>> GetRentalsByUserAsync(int userId);
     }
 }

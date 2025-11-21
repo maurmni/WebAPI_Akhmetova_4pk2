@@ -36,7 +36,7 @@ namespace WebAPI.Repositories
 
         public async Task<bool> IsDriverLicenseUniqueAsync(string driverLicense, int? excludeId = null)
         {
-            var query = _dbSet.Where(c => c.DriverLicense.ToLower() == driverLicense.ToLower());
+            var query = _dbSet.Where(c => c.DriverLicenseNumber.ToLower() == driverLicense.ToLower());
 
             if (excludeId.HasValue)
             {

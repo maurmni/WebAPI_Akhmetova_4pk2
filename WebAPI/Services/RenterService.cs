@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using WebAPI.Models;
 using WebAPI.Repositories;
+using static WebAPI.Models.DTO.RentalDTO;
 using static WebAPI.Models.DTO.RenterDTO;
 
 namespace WebAPI.Services
@@ -8,10 +9,13 @@ namespace WebAPI.Services
     public class RenterService : IRenterService
     {
         private readonly IRenterRepository _renterRepository;
+        private readonly IRentalRepository _rentalRepository;
         private readonly IMapper _mapper;
-        public RenterService(IRenterRepository renterRepository, IMapper mapper)
+
+        public RenterService(IRenterRepository renterRepository, IRentalRepository rentalRepository, IMapper mapper)
         {
             _renterRepository = renterRepository;
+            _rentalRepository = rentalRepository;
             _mapper = mapper;
         }
         public async Task<IEnumerable<RenterResponseDTO>> GetAllRentersAsync()
@@ -59,6 +63,7 @@ namespace WebAPI.Services
                 throw new InvalidOperationException($"Арендатор с водительским удостоверением {renterDto.DriverLicenseNumber} уже существует");
             }
 
+
             _mapper.Map(renterDto, existingRenter);
             var updatedRenter = await _renterRepository.UpdateAsync(existingRenter);
             return _mapper.Map<RenterResponseDTO>(updatedRenter);
@@ -72,5 +77,23 @@ namespace WebAPI.Services
             var renter = await _renterRepository.GetRenterWithRentalsAsync(id);
             return _mapper.Map<RenterResponseDTO?>(renter);
         }
+        /// <summary>
+        /// получить аренды по ID пользователя
+        /// </summary>
+        public async Task<IEnumerable<RentalResponseDTO>> GetRentalsByUserAsync(int renterId)
+        {
+            var rentals = await _rentalRepository.FindAsync(r => r.RenterId == renterId);
+
+            var list = new List<Rental>();
+            foreach (var r in rentals)
+            {
+                var det = await _rentalRepository.GetRentalWithDetailsAsync(r.Id);
+                if (det != null)
+                    list.Add(det);
+            }
+
+            return _mapper.Map<IEnumerable<RentalResponseDTO>>(list);
+        }
+
     }
 }

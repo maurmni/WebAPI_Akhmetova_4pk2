@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.Net;
 using System.Text.Json;
 
 namespace WebAPI
@@ -53,14 +54,23 @@ namespace WebAPI
                     break;
                 case UnauthorizedAccessException:
                     response.StatusCode = (int)HttpStatusCode.Unauthorized;
-                    errorResponse.Message = "Доступ запрещен";
+                    errorResponse.Message = exception.Message;
+                    break;
+                case SecurityTokenException:
+                    response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    errorResponse.Message = "Недействительный токен";
                     break;
                 default:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                    errorResponse.Message = _env.IsDevelopment() 
-                        ? exception.Message 
+                    errorResponse.Message = _env.IsDevelopment()
+                        ? exception.Message
                         : "Внутренняя ошибка сервера";
                     break;
+            }
+
+            if (response.StatusCode == 403)
+            {
+                errorResponse.Message = "Недостаточно прав для доступа к ресурсу";
             }
 
             if (_env.IsDevelopment())
@@ -71,10 +81,11 @@ namespace WebAPI
 
             var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
             var json = JsonSerializer.Serialize(errorResponse, options);
-            
+
             await context.Response.WriteAsync(json);
         }
     }
+
     public class ErrorResponse
     {
         public bool Success { get; set; }

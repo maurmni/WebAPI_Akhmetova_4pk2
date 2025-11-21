@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using WebAPI.Models;
-using Microsoft.EntityFrameworkCore;
 using WebAPI.Repositories;
 using static WebAPI.Models.DTO.RentalDTO;
 
@@ -37,7 +36,7 @@ namespace WebAPI.Services
             return _mapper.Map<RentalResponseDTO?>(rental);
         }
 
-        public async Task<RentalResponseDTO> CreateRentalAsync(RentalCreateDTO rentalDto)
+        public async Task<RentalResponseDTO> CreateRentalAsync(RentalCreateDTO rentalDto, int userId)
         {
             var car = await _carRepository.GetByIdAsync(rentalDto.CarId);
             if (car == null)
@@ -56,10 +55,16 @@ namespace WebAPI.Services
             if (!isAvailable)
                 throw new InvalidOperationException($"Автомобиль занят на указанный период");
 
-            var rentalDays = (rentalDto.EndDate - rentalDto.StartDate).Days;
-            var totalPrice = car.DailyPrice * rentalDays;
+            var days = (rentalDto.EndDate - rentalDto.StartDate).Days;
+            if (days <= 0)
+                throw new ArgumentException("Неверный период аренды");
+
+            var totalPrice = car.DailyPrice * days;
 
             var rental = _mapper.Map<Rental>(rentalDto);
+            rental.UserId = userId;
+            rental.Price = totalPrice;
+            rental.Status = "Active";
 
             car.IsAvailable = false;
             await _carRepository.UpdateAsync(car);
@@ -69,13 +74,18 @@ namespace WebAPI.Services
 
             return _mapper.Map<RentalResponseDTO>(rentalWithDetails);
         }
+
         public async Task<RentalResponseDTO?> CompleteRentalAsync(int id, RentalCompleteDTO completeDto)
         {
             var rental = await _rentalRepository.GetRentalWithDetailsAsync(id);
             if (rental == null)
                 return null;
 
-            rental.ReturnDate = completeDto.ActualReturnDate;
+            if (rental.Status == "Completed")
+                throw new InvalidOperationException("Аренда уже завершена");
+
+            rental.ActualReturnDate = completeDto.ActualReturnDate;
+            rental.Status = "Completed";
 
             var car = await _carRepository.GetByIdAsync(rental.CarId);
             if (car != null)
@@ -87,20 +97,35 @@ namespace WebAPI.Services
             var updatedRental = await _rentalRepository.UpdateAsync(rental);
             return _mapper.Map<RentalResponseDTO>(updatedRental);
         }
+
         public async Task<IEnumerable<RentalResponseDTO>> GetActiveRentalsAsync()
         {
             var rentals = await _rentalRepository.GetActiveRentalsAsync();
             return _mapper.Map<IEnumerable<RentalResponseDTO>>(rentals);
         }
+
         public async Task<IEnumerable<RentalResponseDTO>> GetRentalsByRenterAsync(int renterId)
         {
-            var rentals = await _rentalRepository.GetRentalsByCarIdAsync(renterId);
+            var rentals = await _rentalRepository.GetRentalsByRenterIdAsync(renterId);
             return _mapper.Map<IEnumerable<RentalResponseDTO>>(rentals);
         }
+
         public async Task<IEnumerable<RentalResponseDTO>> GetOverdueRentalsAsync()
         {
             var rentals = await _rentalRepository.GetOverdueRentalsAsync();
             return _mapper.Map<IEnumerable<RentalResponseDTO>>(rentals);
+        }
+
+        public async Task<IEnumerable<RentalResponseDTO>> GetRentalsByUserAsync(int userId)
+        {
+            var rentals = await _rentalRepository.FindAsync(r => r.UserId == userId);
+            var rentalList = rentals.ToList();
+            for (var i = 0; i < rentalList.Count; i++)
+            {
+                var detailed = await _rentalRepository.GetRentalWithDetailsAsync(rentalList[i].Id);
+                rentalList[i] = detailed ?? rentalList[i];
+            }
+            return _mapper.Map<IEnumerable<RentalResponseDTO>>(rentalList);
         }
     }
 }
